@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css">
+  <title>Aristocracy</title>
+  <style>
+    .slidecontainer {
+      width: 100%;
+    }
+    
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 15px;
+      border-radius: 5px;
+      background: #d3d3d3;
+      outline: none;
+      opacity: 0.7;
+      -webkit-transition: .2s;
+      transition: opacity .2s;
+    }
+    
+    .slider:hover {
+      opacity: 1;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #4CAF50;
+      cursor: pointer;
+    }
+    
+    .slider::-moz-range-thumb {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #4CAF50;
+      cursor: pointer;
+    }
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <div class="paper container">
+    <h1>Aristocracy</h1>
+    
+    <p>Let's explore how much starting wealth it would take to build an Aristocracy.</p>
+    
+    <p>The average stock market return is 7%.  What return do you want to assume?</p>
+    
+    <div class="slidecontainer">
+      <input type="range" min="1" max="100" value="10" class="slider" id="market">
+      <p>Market return: <span id="market-text"></span>%</p>
+    </div>
+    
+    <p>Inflation is normally around 2.2%.  What rate of inflation do you want to assume?</p>
+    
+    <div class="slidecontainer">
+      <input type="range" min="0" max="100" value="10" class="slider" id="inflation">
+      <p>Inflation: <span id="inflation-text"></span>%</p>
+    </div>
+    
+    <p>So, in Constant Dollars, you expect to have <span id="growth" class="badge danger"></span>% growth.</p>
+    
+    <div id="pessimist" sytle="display:none">
+      <p>Well, that's pessimistic of you, but yeah, there's no way to make your numbers work.  I guess you'll need to get a job.</p>
+    </div>
+    
+    <div id="optimist">
+
+      <p>How much, in today's dollars, do you want to spend per year?</p>
+      
+      <div class="slidecontainer">
+        <input type="range" min="1" max="100" value="10" class="slider" id="spend">
+        <p>Spend: $<span id="spend-text"></span></p>
+      </div>
+      
+      <p>So, if it were just you, you would need to start with $<span id="singleton" class="badge danger"></span>.</p>
+  
+      <p>How old will you be when you start having kids?  The longer you wait, the easier it is to save up for their needs.</p>
+      
+      <div class="slidecontainer">
+        <input type="range" min="1" max="100" value="10" class="slider" id="age">
+        <p>Age: <span id="age-text"></span></p>
+      </div>
+  
+      <p>How many kids will you have, total, during your life?</p>
+      
+      <div class="slidecontainer">
+        <input type="range" min="1" max="100" value="10" class="slider" id="kids">
+        <p>Number of kids: <span id="kids-text"></span></p>
+      </div>
+      
+      <p>Just to be on the safe side, we'll presume you have all of your kids, all at once.</p>
+      
+      <p>So, starting from the day you are born, you will need to save enough money so that when you start having kids, they will each have the same starting money you did.  Then the whole cycle perpetuates forever.</p>
+      
+      <p>So, you must save $<span id="fuel" class="badge danger"></span> in <span id="years" class="badge danger"></span> years.</p>
+      
+      <p>At your growth rate, that will cost about $<span id="saving" class="badge danger"></span> per year.</p>
+      
+      <p>That brings your total amount you need to receive per year to $<span id="receive" class="badge danger"></span>.</p>
+      
+      <center><h1><span class="badge secondary">$<span id="family"></span></span></h1></center>
+      
+      <p>That's how much you need to have started with on the day you were born, and that's how much you will give to each of your children on the days they are born.  You will die with more than that.</p>
+      
+      <p>Because, once you give your kids their money, you will have more money than you need and so it will grow faster than you spend it.  You can give it all to charity in your will.  That's right, your bank account will never go below that number.</p>
+      
+      <p>In fact, if you live to be a hundred years old, the final amount you will be able to give to charity is:</p>
+      
+      <center><h1><span class="badge success">$<span id="final"></span>*</h1></center>
+      
+      <p>* - and that's in constant dollars.</p>
+    
+    </div>
+    
+  </div>
+  <script>
+    function numberWithCommas(x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    
+    function wire(sliderName, outputName, value, map, update) {
+      var slider = document.getElementById(sliderName);
+      var output = document.getElementById(outputName);
+      output.innerHTML = value * 10;
+      
+      var inside = false;
+      slider.oninput = function() {
+        if (inside) return;
+        inside = true;
+        output.innerHTML = map(this.value);
+        update(sliderName);
+        inside = false;
+      }
+      
+      slider.value = value * 10;
+      slider.oninput();
+    }
+    
+    wire("market", "market-text", 7.0, (value) => (value / 10.0).toFixed(1), update);
+    wire("inflation", "inflation-text", 2.2, (value) => (value / 10.0).toFixed(1), update);
+    wire("spend", "spend-text", 1, (value) => numberWithCommas(value * 10000), update);
+    wire("age", "age-text", 4, (value) => (16 + value / 2.0).toFixed(1), update);
+    wire("kids", "kids-text", 1, (value) => (value / 10.0).toFixed(0), update);
+
+    function update(changing) {
+      var growth = document.getElementById("growth");
+      var singleton  = document.getElementById("singleton");
+      var market = document.getElementById("market").value / 10;
+      var inflation = document.getElementById("inflation").value / 10;
+      var spend = document.getElementById("spend").value* 10000;
+      var age = (16 + document.getElementById("age").value / 2.0).toFixed(1);
+      var kids = (document.getElementById("kids").value / 10.0).toFixed(0);
+      //console.log("age: " + age);
+      //console.log("kids: " + kids);
+      
+      document.getElementById("inflation")
+      var growthRate = market - inflation;
+      
+      growth.innerHTML = (growthRate).toFixed(1);
+      
+      var optimist = document.getElementById("optimist");
+      var pessimist = document.getElementById("pessimist");
+      if (growthRate <= 0)
+      {
+        optimist.style.display = "none";
+        pessimist.style.display = "block";
+        return;
+      } else {
+        pessimist.style.display = "none";
+        optimist.style.display = "block";
+      }
+      
+      var singletonValue = spend / (growthRate / 100.0);
+      singleton.innerHTML = numberWithCommas(singletonValue.toFixed(0));
+      
+      var fuelAmount = singletonValue * kids;
+      document.getElementById("fuel").innerHTML = numberWithCommas(fuelAmount.toFixed(0));
+      
+      document.getElementById("years").innerHTML = age;
+
+      // There must be a way to do this analytically...  Logs?  Compounding interest?  Something?
+      var savingPerYear = 0;
+      while (true) {
+        var accum = 100;
+        for (var i = 0; i < age; i++) {
+          accum += savingPerYear;
+          accum += (accum * growthRate / 100.0);
+        }
+        if (accum >= fuelAmount) {
+          break;
+        }
+        //console.log("Saving $" + savingPerYear + " net $" + numberWithCommas(accum.toFixed(0)) + ", less than $" + numberWithCommas(accum.toFixed(0)) + ", trying again");
+        savingPerYear += 1000;
+      }
+      
+      document.getElementById("saving").innerHTML = numberWithCommas(savingPerYear.toFixed(0));
+      
+      var receiveValue = savingPerYear + spend;
+      document.getElementById("receive").innerHTML = numberWithCommas(receiveValue.toFixed(0));
+      
+      var familyValue = receiveValue / (growthRate / 100.0);
+      document.getElementById("family").innerHTML = numberWithCommas(familyValue.toFixed(0));
+      
+      var final = familyValue;
+      for (let a = 0; a < 100; a++) {
+        final += (final * growthRate / 100.0);
+        if (a <= age) {
+          final -= savingPerYear;
+        }
+        final -= spend;
+      }
+      //console.log(final);
+      
+      document.getElementById("final").innerHTML = numberWithCommas(final.toFixed(0));
+    }
+  </script>
+</body>
+</html>
