@@ -108,6 +108,8 @@
       
       <p>That brings your total amount you need to receive per year to $<span id="receive" class="badge danger"></span>.</p>
       
+      <p>So the final total is this:</p>
+      
       <center><h1><span class="badge secondary">$<span id="family"></span></span></h1></center>
       
       <p>That's how much you need to have started with on the day you were born, and that's how much you will give to each of your children on the days they are born.  You will die with more than that.</p>
@@ -119,6 +121,10 @@
       <center><h1><span class="badge success">$<span id="final"></span>*</h1></center>
       
       <p>* - and that's in constant dollars.</p>
+      
+      <p>But if you'd rather die with as little money as possible, at the ripe old age of $100, you just need to start with:</p>
+      
+      <center><h1><span class="badge danger">$<span id="grand"></span></h1></center>
     
     </div>
     
@@ -222,6 +228,34 @@
       //console.log(final);
       
       document.getElementById("final").innerHTML = numberWithCommas(final.toFixed(0));
+      
+      var startingWealth = 100000;
+      while (true) {
+        //console.log("trying $" + numberWithCommas(startingWealth.toFixed(0)));
+        var wealth = startingWealth;
+        var kidWealth = 0;
+        for (var i = 0; i < age; i++) {
+          wealth += (wealth * growthRate / 100.0);
+          if (i <= age) {
+            wealth -= savingPerYear;
+            kidWealth += (kidWealth * growthRate / 100.0);
+            kidWealth += savingPerYear;
+          }
+          if (i == age) {
+            if (kidWealth < startingWealth) {
+              continue;
+            }
+          }
+          wealth -= spend;
+        }
+        if (wealth > 0) {
+          //console.log("Died with $" + numberWithCommas(wealth.toFixed(0)));
+          break;
+        }
+        startingWealth += 10000;
+      }
+      //console.log("$" + numberWithCommas(startingWealth));
+      document.getElementById("grand").innerHTML = numberWithCommas(startingWealth.toFixed(0));
     }
   </script>
 </body>
